@@ -65,6 +65,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     
     CGPoint _minPossibleContentOffset;
     CGPoint _maxPossibleContentOffset;
+	CGPoint _startPoint;
     
     // Transforming control vars
     GMGridViewCell *_transformingItem;
@@ -146,6 +147,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 @synthesize editing = _editing;
 @synthesize enableEditOnLongPress;
 @synthesize disableEditOnEmptySpaceTap;
+@synthesize enableMoveWhenEditing;
 
 @synthesize itemsSubviewsCacheIsValid = _itemsSubviewsCacheIsValid;
 @synthesize itemSubviewsCache;
@@ -500,7 +502,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     }
     else if (gestureRecognizer == _longPressGesture)
     {
-        valid = (self.sortingDelegate || self.enableEditOnLongPress) && !isScrolling && !self.isEditing;
+        valid = (self.editing && self.enableMoveWhenEditing) ||
+            ((self.sortingDelegate || self.enableEditOnLongPress) && !isScrolling && !self.isEditing);
     }
     else if (gestureRecognizer == _sortingPanGesture) 
     {
@@ -607,7 +610,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
             CGPoint offset = translation;
             CGPoint locationInScroll = [panGesture locationInView:self];
             
-            _sortMovingItem.transform = CGAffineTransformMakeTranslation(offset.x, offset.y);
+            _sortMovingItem.center = CGPointMake(_startPoint.x + offset.x, _startPoint.y + offset.y);
             [self sortingMoveDidContinueToPoint:locationInScroll];
             
             break;
@@ -711,6 +714,7 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     _sortMovingItem = item;
     
     CGRect frameInMainView = [self convertRect:_sortMovingItem.frame toView:self.mainSuperView];
+	_startPoint = [self convertPoint:_sortMovingItem.center toView:self.mainSuperView];
     
     [_sortMovingItem removeFromSuperview];
     _sortMovingItem.frame = frameInMainView;
@@ -736,7 +740,9 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
 
 - (void)sortingMoveDidStopAtPoint:(CGPoint)point
 {
-    [_sortMovingItem shake:NO];
+    if (!(self.editing && self.enableMoveWhenEditing)) {
+        [_sortMovingItem shake:NO];
+    }
     
     _sortMovingItem.tag = _sortFuturePosition + kTagOffset;
     

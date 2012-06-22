@@ -200,7 +200,7 @@
         }
 		
         self.contentView.userInteractionEnabled = !editing;
-        [self shakeStatus:editing];
+        [self shake:editing];
     }
 }
 
@@ -290,7 +290,7 @@
 {
     if ((on && !self.inShakingMode) || (!on && self.inShakingMode)) 
     {
-        [self.contentView shakeStatus:on];
+        [self shakeStatus:on];
         _inShakingMode = on;
     }
 }
