@@ -751,6 +751,8 @@ static const UIViewAnimationOptions kDefaultAnimationOptions = UIViewAnimationOp
     [_sortMovingItem removeFromSuperview];
     _sortMovingItem.frame = frameInScroll;
     [self addSubview:_sortMovingItem];
+	
+	_sortMovingItem.highlighted = NO;
     
     CGPoint newOrigin = [self.layoutStrategy originForItemAtPosition:_sortFuturePosition];
     CGRect newFrame = CGRectMake(newOrigin.x, newOrigin.y, _itemSize.width, _itemSize.height);
